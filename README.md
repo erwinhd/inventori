@@ -1,0 +1,2 @@
+# inventori
+kasir warung
