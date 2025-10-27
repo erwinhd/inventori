@@ -1,19 +1,162 @@
-<?php include 'config/koneksi.php'; ?>
 <!DOCTYPE html>
-<html>
+<html lang="id">
 <head>
-    <title>Sistem Inventori & Kasir</title>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Inventori Barang Sederhana</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f8f9fa;
+      margin: 0;
+      padding: 20px;
+    }
+    h1 {
+      text-align: center;
+      color: #007bff;
+    }
+    .container {
+      max-width: 800px;
+      margin: 0 auto;
+      background: white;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    }
+    form {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+    input {
+      padding: 10px;
+      flex: 1;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+    }
+    button {
+      padding: 10px 15px;
+      background-color: #007bff;
+      border: none;
+      color: white;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+    button:hover {
+      background-color: #0056b3;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+    th, td {
+      border: 1px solid #ccc;
+      padding: 8px;
+      text-align: center;
+    }
+    th {
+      background-color: #007bff;
+      color: white;
+    }
+    .actions button {
+      background-color: #28a745;
+      margin: 0 2px;
+    }
+    .actions button.delete {
+      background-color: #dc3545;
+    }
+  </style>
 </head>
-<body class="p-4">
-    <h2 class="text-center">💼 Sistem Inventori & Kasir</h2>
-    <hr>
-    <div class="d-flex justify-content-center">
-        <a href="barang/index.php" class="btn btn-primary m-2">Data Barang</a>
-        <a href="transaksi/masuk.php" class="btn btn-success m-2">Stok Masuk</a>
-        <a href="transaksi/keluar.php" class="btn btn-danger m-2">Stok Keluar</a>
-        <a href="transaksi/kasir.php" class="btn btn-warning m-2">Kasir</a>
-        <a href="laporan/index.php" class="btn btn-dark m-2">Laporan</a>
-    </div>
+<body>
+  <h1>Inventori Barang Sederhana</h1>
+  <div class="container">
+    <form id="formBarang">
+      <input type="text" id="nama" placeholder="Nama Barang" required />
+      <input type="number" id="stok" placeholder="Stok" required />
+      <input type="number" id="harga" placeholder="Harga" required />
+      <button type="submit">Tambah</button>
+    </form>
+
+    <table>
+      <thead>
+        <tr>
+          <th>No</th>
+          <th>Nama Barang</th>
+          <th>Stok</th>
+          <th>Harga</th>
+          <th>Aksi</th>
+        </tr>
+      </thead>
+      <tbody id="tabelBarang"></tbody>
+    </table>
+  </div>
+
+  <script>
+    let daftarBarang = JSON.parse(localStorage.getItem("inventori")) || [];
+
+    const form = document.getElementById("formBarang");
+    const tabel = document.getElementById("tabelBarang");
+
+    function simpanData() {
+      localStorage.setItem("inventori", JSON.stringify(daftarBarang));
+    }
+
+    function renderTabel() {
+      tabel.innerHTML = "";
+      daftarBarang.forEach((barang, index) => {
+        const tr = document.createElement("tr");
+        tr.innerHTML = `
+          <td>${index + 1}</td>
+          <td>${barang.nama}</td>
+          <td>${barang.stok}</td>
+          <td>Rp ${barang.harga.toLocaleString()}</td>
+          <td class="actions">
+            <button onclick="editBarang(${index})">Edit</button>
+            <button class="delete" onclick="hapusBarang(${index})">Hapus</button>
+          </td>
+        `;
+        tabel.appendChild(tr);
+      });
+    }
+
+    form.addEventListener("submit", (e) => {
+      e.preventDefault();
+      const nama = document.getElementById("nama").value;
+      const stok = parseInt(document.getElementById("stok").value);
+      const harga = parseInt(document.getElementById("harga").value);
+      daftarBarang.push({ nama, stok, harga });
+      simpanData();
+      renderTabel();
+      form.reset();
+    });
+
+    function hapusBarang(index) {
+      if (confirm("Hapus barang ini?")) {
+        daftarBarang.splice(index, 1);
+        simpanData();
+        renderTabel();
+      }
+    }
+
+    function editBarang(index) {
+      const barang = daftarBarang[index];
+      const namaBaru = prompt("Nama Barang:", barang.nama);
+      const stokBaru = prompt("Stok:", barang.stok);
+      const hargaBaru = prompt("Harga:", barang.harga);
+
+      if (namaBaru && stokBaru && hargaBaru) {
+        daftarBarang[index] = {
+          nama: namaBaru,
+          stok: parseInt(stokBaru),
+          harga: parseInt(hargaBaru)
+        };
+        simpanData();
+        renderTabel();
+      }
+    }
+
+    renderTabel();
+  </script>
 </body>
 </html>
